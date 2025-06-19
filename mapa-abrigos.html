@@ -62,7 +62,7 @@
 <main id="main">
 
  <!-- ======= Breadcrumbs ======= -->
-<section class="breadcrumbs">
+<section class="breadcrumbs show-banner">
   <div class="container">
     <div class="d-flex flex-column align-items-center text-center">
       <h2>Lista de Abrigos em toda a Cidade</h2>
@@ -72,6 +72,48 @@
     </div>
   </div>
 </section>
+
+<style>
+  .breadcrumbs {
+    background: #f8f9fa;
+    padding: 20px 10px;
+    transition: all 0.6s ease;
+    overflow: hidden;
+  }
+
+  .breadcrumbs.hide-banner {
+    max-height: 0;
+    padding: 0;
+    opacity: 0;
+  }
+
+  .breadcrumbs.show-banner {
+    max-height: 300px;
+    opacity: 1;
+  }
+
+  /* Responsivo opcional (garantindo espaço reduzido em telas menores) */
+  @media (max-width: 768px) {
+    .breadcrumbs h2 {
+      font-size: 1.2rem;
+    }
+    .breadcrumbs p {
+      font-size: 0.9rem;
+    }
+  }
+</style>
+
+<script>
+  // Recolhe o banner após 6 segundos
+  document.addEventListener("DOMContentLoaded", function () {
+    setTimeout(function () {
+      const banner = document.querySelector(".breadcrumbs");
+      banner.classList.remove("show-banner");
+      banner.classList.add("hide-banner");
+    }, 6000); // tempo em milissegundos
+  });
+</script>
+
 
 
 
