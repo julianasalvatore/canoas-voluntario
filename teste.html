@@ -1,0 +1,89 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8" />
+  <title>Alertas INMET – RS</title>
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      margin: 20px;
+      background: #f8f8f8;
+    }
+    #alertas {
+      background: #fff8f8;
+      padding: 15px;
+      border-radius: 8px;
+      border: 1px solid #ccc;
+    }
+    #alertas h2 {
+      color: #c0392b;
+    }
+    .alerta {
+      margin-bottom: 20px;
+      padding: 10px;
+      background: #fff;
+      border-left: 5px solid #e74c3c;
+      box-shadow: 0 0 6px rgba(0, 0, 0, 0.05);
+    }
+    .alerta h3 {
+      margin: 0 0 5px 0;
+      font-size: 1.2em;
+      color: #b30000;
+    }
+    .alerta p {
+      margin: 5px 0;
+    }
+  </style>
+</head>
+<body>
+
+  <h1>Alertas INMET – RS</h1>
+  <div id="alertas"><em>Carregando...</em></div>
+
+  <script>
+    async function fetchINMET_RS() {
+      try {
+        const response = await fetch('https://corsproxy.io/?https://alertas2.inmet.gov.br/RS');
+        const html = await response.text();
+        const parser = new DOMParser();
+        const doc = parser.parseFromString(html, 'text/html');
+
+        const container = document.getElementById('alertas');
+        container.innerHTML = '';
+
+        const alertas = doc.querySelectorAll('.MuiAccordion-root');
+
+        if (alertas.length === 0) {
+          container.innerHTML = '<p>Nenhum alerta ativo para o RS no momento.</p>';
+          return;
+        }
+
+        alertas.forEach(item => {
+          const titulo = item.querySelector('.MuiAccordionSummary-content')?.textContent.trim() || 'Alerta';
+          const detalhes = item.querySelector('.MuiAccordionDetails-root')?.textContent.trim() || 'Sem detalhes.';
+
+          const div = document.createElement('div');
+          div.className = 'alerta';
+
+          div.innerHTML = `
+            <h3>${titulo}</h3>
+            <p>${detalhes.replace(/\n/g, '<br>')}</p>
+          `;
+          container.appendChild(div);
+        });
+
+      } catch (error) {
+        console.error('Erro ao buscar dados do INMET:', error);
+        document.getElementById('alertas').innerHTML =
+          '<p style="color:red;">Erro ao carregar alertas do INMET. Tente novamente mais tarde.</p>';
+      }
+    }
+
+    // Carrega ao iniciar e repete a cada 20 minutos
+    fetchINMET_RS();
+    setInterval(fetchINMET_RS, 20 * 60 * 1000);
+  </script>
+
+</body>
+</html>

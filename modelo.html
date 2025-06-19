@@ -47,10 +47,10 @@
       <nav class="nav-menu d-none d-lg-block">
         <ul>
           <li class="active"><a href="index.html">Home</a></li>
-            <li><a href="camerasaovivo.html">Câmeras AO VIVO</a></li>
-            <li><a href="https://alertas2.inmet.gov.br/">Informações meteorológicas</a></li>
-            <li><a href="inner-page.html">Previsão do Tempo</a></li>
-            <li><a href="radar.html">Radar Meteorológico</a></li>
+          <li><a href="camerasaovivo.html">Câmeras AO VIVO</a></li>
+          <li><a href="mapa-abrigos.html">Abrigos - Mapa Interativo</a></li>
+          <li><a href="previsao-tempo.html">Previsão do Tempo</a></li>
+          <li><a href="radar-canoas.html">Radar Meteorológico</a></li>
       </nav>
     </div>
 
@@ -65,9 +65,9 @@
 <section class="breadcrumbs">
   <div class="container">
     <div class="d-flex flex-column align-items-center text-center">
-      <h2>Lista de Abrigos em toda a Cidade</h2>
+
       <p>
-        <i><b>ATENÇÃO:</b> As informações abaixo estão disponíveis publicamente online. A responsável pela página apenas centraliza as informações já disponíveis na internet as informações podem mudar sem aviso prévio, por esse motivo, acompanhem as informações fornecidas pelos canais oficiais da prefeitura de Canoas/Rs</i>
+        <i><b>ATENÇÃO:</b> As informações abaixo estão disponíveis publicamente online no site Open Weather</i>
       </p>
     </div>
   </div>
@@ -87,192 +87,175 @@
 <!DOCTYPE html>
 <html lang="pt-BR">
 <head>
-  <meta charset="UTF-8" />
-  <title>Mapa Interativo - Canoas/RS</title>
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <link rel="stylesheet" href="https://unpkg.com/leaflet/dist/leaflet.css" />
+  <meta charset="UTF-8">
+  <title>Canoas/RS - Clima</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <style>
-    #mapa {
-      height: 100vh;
-      width: 100%;
+    body {
+      font-family: Arial, sans-serif;
+      background: #f0f0f0;
+      margin: 0;
+      padding: 0;
+      color: #333;
     }
-    .search-box {
-      position: absolute;
-      top: 200px;
-      left: 25px;
-      background: white;
-      padding: 10px;
-      border-radius: 8px;
-      z-index: 1000;
-      box-shadow: 0 0 10px rgba(0,0,0,0.2);
-      width: 280px;
-      transition: all 0.3s ease;
-    }
-    .search-box.collapsed {
-      transform: translateX(-85%);
-    }
-    .toggle-btn {
-      position: absolute;
-      top: 20px;
-      right: -30px;
-      background: #0c6815fd;
+
+    header {
+      background-color: #4CAF50;
       color: white;
-      border-radius: 0 4px 4px 0;
-      padding: 5px 10px;
-      cursor: pointer;
-      font-size: 14px;
+      padding: 1rem;
+      text-align: center;
+      box-shadow: 0 2px 5px rgba(0,0,0,0.2);
     }
-    .leaflet-popup-content {
-      width: auto !important;
-      max-width: none !important;
+
+    /* Estilo base para todas as seções */
+    section {
+      background-color: white;
+      margin: 20px auto;
+      padding: 20px;
+      border-radius: 8px;
+      width: 95%;             /* ocupa 95% da largura da tela */
+      max-width: 1000px;      /* você pode ajustar esse valor para aumentar ou diminuir */
+      box-shadow: 0 4px 8px rgba(0,0,0,0.1);
     }
-    .leaflet-top.leaflet-left {
-      top: 50px !important;
-      left: 10px !important;
-      z-index: 999;
+
+    /* Estilo da previsão: blocos verticais com dados lado a lado */
+    #forecast-container > .day-forecast {
+      display: flex;
+      align-items: center;
+      gap: 15px;
+      padding: 10px 0;
+      border-bottom: 1px solid #ddd;
     }
-    .categoria-group {
-      margin-left: 20px;
-      margin-top: 5px;
-      margin-bottom: 10px;
+
+    #forecast-container > .day-forecast:last-child {
+      border-bottom: none;
+    }
+
+    .day-forecast img {
+      width: 50px;
+      height: 50px;
+    }
+
+    .day-forecast .info {
+      flex-grow: 1;
     }
   </style>
 </head>
 <body>
-  <div class="search-box" id="menuBox">
-    <div class="toggle-btn" onclick="toggleMenu()">⮜</div>
 
-    <div class="categoria-group">
-      <label><input type="checkbox" id="checkAbrigoMulher" checked onchange="sincronizarAbrigos()"> Exclusivo para Mulheres e Crianças</label><br>
-      <label><input type="checkbox" id="checkAbrigoAnimal" checked onchange="sincronizarAbrigos()"> Abrigo para Animais</label><br>
-      <label><input type="checkbox" id="checkAbrigoColetivo" checked onchange="sincronizarAbrigos()"> Abrigo Coletivo</label>
-    </div>
 
-    <label for="raioBusca">Raio (km):</label>
-    <input type="number" id="raioBusca" value="5" min="1" max="50" /><br>
+  <!-- INÍCIO: Box de informações climáticas atuais -->
+  <section id="weather-info">
+    <h2>Informações Climáticas Atuais</h2>
+    <p><strong>Atualizado em:</strong> <span id="last_update">--</span></p>
+    <p><strong>Local:</strong> Canoas, RS</p>
+    <p><strong>Temperatura:</strong> <span id="temp">--</span>°C</p>
+    <p><strong>Sensação Térmica:</strong> <span id="feels_like">--</span>°C</p>
+    <p><strong>Umidade:</strong> <span id="humidity">--</span>%</p>
+    <p><strong>Pressão:</strong> <span id="pressure">--</span> hPa</p>
+    <p><strong>Vento:</strong> <span id="wind_speed">--</span> m/s</p>
+    <p><strong>Nuvens:</strong> <span id="clouds">--</span>%</p>
+    <p><strong>Descrição:</strong> <span id="description">--</span>
+      <img id="weather-icon" src="" alt="" style="vertical-align: middle; width: 40px; height: 40px;">
+    </p>
+  </section>
+  <!-- FIM: Box de informações climáticas atuais -->
 
-    <button onclick="buscarProximos()">Buscar</button><br>
-    <button onclick="obterLocalizacaoUsuario()">Usar minha localização</button>
-  </div>
+  <!-- INÍCIO: Box da previsão para os próximos 7 dias -->
+  <section id="forecast">
+    <h3>Previsão para hoje e os Próximos 4 Dias</h3>
+    <div id="forecast-container"></div>
+  </section>
+  <!-- FIM: Box da previsão -->
 
-  <div id="mapa"></div>
-
-  <script src="https://unpkg.com/leaflet/dist/leaflet.js"></script>
   <script>
-    const centroCanoas = [-29.915, -51.18];
-    const mapa = L.map("mapa").setView(centroCanoas, 12);
+    const apiKey = "594af3a9e98618fef254034198b1a293";
+    const lat = -29.9128;
+    const lon = -51.1858;
 
-    L.tileLayer("https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png", {
-      attribution: "© OpenStreetMap",
-    }).addTo(mapa);
+    function carregarDadosClimaticos() {
+      const url = `https://api.openweathermap.org/data/2.5/weather?lat=${lat}&lon=${lon}&appid=${apiKey}&units=metric&lang=pt_br`;
 
-    // Círculo pontilhado, sem preenchimento, maior raio (ex: 13 km)
-    const raioCanoas = 13000;  // 13 km em metros
+      fetch(url)
+        .then(response => response.json())
+        .then(data => {
+          document.getElementById("temp").textContent = data.main.temp.toFixed(1);
+          document.getElementById("feels_like").textContent = data.main.feels_like.toFixed(1);
+          document.getElementById("humidity").textContent = data.main.humidity;
+          document.getElementById("pressure").textContent = data.main.pressure;
+          document.getElementById("wind_speed").textContent = data.wind.speed;
+          document.getElementById("clouds").textContent = data.clouds.all;
+          document.getElementById("description").textContent = data.weather[0].description;
 
-    const circuloCanoas = L.circle(centroCanoas, {
-      color: 'purple',
-      weight: 3,
-      fillOpacity: 0,
-      dashArray: '10, 10'  // padrão pontilhado
-    }).setRadius(raioCanoas).addTo(mapa);
+          const iconCode = data.weather[0].icon;
+          const iconUrl = `https://openweathermap.org/img/wn/${iconCode}@2x.png`;
+          document.getElementById("weather-icon").src = iconUrl;
+          document.getElementById("weather-icon").alt = data.weather[0].description;
 
-    const iconeAbrigoAnimal = L.icon({ iconUrl: "https://cdn-icons-png.flaticon.com/512/3769/3769065.png", iconSize: [32, 32], iconAnchor: [16, 32], popupAnchor: [0, -32] });
-    const iconeAbrigoMulher = L.icon({ iconUrl: "https://cdn-icons-png.flaticon.com/512/149/149060.png", iconSize: [32, 32], iconAnchor: [16, 32], popupAnchor: [0, -32] });
-    const iconeAbrigoColetivo = L.icon({ iconUrl: "https://cdn-icons-png.flaticon.com/512/684/684908.png", iconSize: [32, 32], iconAnchor: [16, 32], popupAnchor: [0, -32] });
-
-    const abrigos = {
-      mulher: [
-        { nome: "Abrigo para Mulheres e Crianças", coord: [-29.9181, -51.1803], icon: iconeAbrigoMulher }
-      ],
-      animal: [
-        { nome: "Abrigo para Animais - Estância Velha", coord: [-29.9052784, -51.15588], icon: iconeAbrigoAnimal }
-      ],
-      coletivo: [
-        { nome: "Abrigo Coletivo Canoas Centro", coord: [-29.9151, -51.1825], icon: iconeAbrigoColetivo }
-      ]
-    };
-
-    const grupoAbrigoMulher = L.layerGroup().addTo(mapa);
-    const grupoAbrigoAnimal = L.layerGroup().addTo(mapa);
-    const grupoAbrigoColetivo = L.layerGroup().addTo(mapa);
-
-    function toggleMenu() {
-      const menuBox = document.getElementById("menuBox");
-      const toggleBtn = menuBox.querySelector(".toggle-btn");
-      menuBox.classList.toggle("collapsed");
-      toggleBtn.innerText = menuBox.classList.contains("collapsed") ? "⮞ MENU" : "⮜";
-    }
-
-    function obterLocalizacaoUsuario() {
-      if (!navigator.geolocation) return alert("Geolocalização não suportada.");
-      navigator.geolocation.getCurrentPosition(pos => {
-        const { latitude, longitude } = pos.coords;
-        L.circleMarker([latitude, longitude], {
-          radius: 8,
-          fillColor: "blue",
-          color: "#000",
-          weight: 1,
-          opacity: 1,
-          fillOpacity: 0.8
-        }).addTo(mapa).bindPopup("Você está aqui").openPopup();
-        mapa.setView([latitude, longitude], 14);
-      }, () => alert("Não foi possível obter a localização."));
-    }
-
-    function calcularDistancia(origem, destino) {
-      const R = 6371, dLat = (destino[0] - origem[0]) * Math.PI / 180, dLon = (destino[1] - origem[1]) * Math.PI / 180;
-      const a = Math.sin(dLat / 2) ** 2 + Math.cos(origem[0] * Math.PI / 180) * Math.cos(destino[0] * Math.PI / 180) * Math.sin(dLon / 2) ** 2;
-      return R * 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
-    }
-
-    function sincronizarAbrigos() {
-      buscarProximos();
-    }
-
-    function buscarProximos() {
-      const raio = parseFloat(document.getElementById("raioBusca").value);
-      const origem = [mapa.getCenter().lat, mapa.getCenter().lng];
-
-      grupoAbrigoMulher.clearLayers();
-      grupoAbrigoAnimal.clearLayers();
-      grupoAbrigoColetivo.clearLayers();
-
-      if (document.getElementById("checkAbrigoMulher").checked) {
-        abrigos.mulher.forEach(p => {
-          if (calcularDistancia(origem, p.coord) <= raio) {
-            L.marker(p.coord, { icon: p.icon })
-             .bindPopup(`<strong>${p.nome}</strong><br><a href='https://www.google.com/maps/dir/?api=1&destination=${p.coord[0]},${p.coord[1]}' target='_blank'>Ver rota</a>`)
-             .addTo(grupoAbrigoMulher);
-          }
+          document.getElementById("last_update").textContent = new Date().toLocaleString("pt-BR");
+        })
+        .catch(error => {
+          console.error("Erro ao obter dados climáticos:", error);
+          alert("Erro ao carregar clima atual.");
         });
-      }
-
-      if (document.getElementById("checkAbrigoAnimal").checked) {
-        abrigos.animal.forEach(p => {
-          if (calcularDistancia(origem, p.coord) <= raio) {
-            L.marker(p.coord, { icon: p.icon })
-             .bindPopup(`<strong>${p.nome}</strong><br><a href='https://www.google.com/maps/dir/?api=1&destination=${p.coord[0]},${p.coord[1]}' target='_blank'>Ver rota</a>`)
-             .addTo(grupoAbrigoAnimal);
-          }
-        });
-      }
-
-      if (document.getElementById("checkAbrigoColetivo").checked) {
-        abrigos.coletivo.forEach(p => {
-          if (calcularDistancia(origem, p.coord) <= raio) {
-            L.marker(p.coord, { icon: p.icon })
-             .bindPopup(`<strong>${p.nome}</strong><br><a href='https://www.google.com/maps/dir/?api=1&destination=${p.coord[0]},${p.coord[1]}' target='_blank'>Ver rota</a>`)
-             .addTo(grupoAbrigoColetivo);
-          }
-        });
-      }
     }
 
-    // Mostrar os pontos ao carregar a página
-    window.onload = buscarProximos;
+    function carregarPrevisao() {
+      const url = `https://api.openweathermap.org/data/2.5/forecast?lat=${lat}&lon=${lon}&appid=${apiKey}&units=metric&lang=pt_br`;
+
+      fetch(url)
+        .then(response => response.json())
+        .then(data => {
+          const diasPrevisao = {};
+          data.list.forEach(item => {
+            const date = new Date(item.dt * 1000);
+            const hora = date.getHours();
+            const dia = date.toLocaleDateString("pt-BR");
+
+            if (hora === 12 && !diasPrevisao[dia]) {
+              diasPrevisao[dia] = item;
+            }
+          });
+
+          const container = document.getElementById("forecast-container");
+          container.innerHTML = "";
+
+          Object.keys(diasPrevisao).slice(0, 7).forEach(dia => {
+            const item = diasPrevisao[dia];
+            const icon = item.weather[0].icon;
+            const iconUrl = `https://openweathermap.org/img/wn/${icon}@2x.png`;
+            const desc = item.weather[0].description;
+            const tempMin = item.main.temp_min.toFixed(1);
+            const tempMax = item.main.temp_max.toFixed(1);
+
+            const div = document.createElement("div");
+            div.className = "day-forecast";
+            div.innerHTML = `
+              <img src="${iconUrl}" alt="${desc}">
+              <div class="info">
+                <strong>${dia}</strong><br>
+                ${desc}<br>
+                Máx: ${tempMax}°C / Mín: ${tempMin}°C
+              </div>
+            `;
+            container.appendChild(div);
+          });
+        })
+        .catch(error => {
+          console.error("Erro ao carregar previsão:", error);
+          alert("Erro ao carregar previsão dos próximos dias.");
+        });
+    }
+
+    document.addEventListener("DOMContentLoaded", () => {
+      carregarDadosClimaticos();
+      carregarPrevisao();
+    });
   </script>
+
 </body>
 </html>
+
 
 
 
@@ -509,7 +492,7 @@
                   }
                 }
               </style>
-<-==================================-->
+<!--==================================-->
 
 </body>
 
